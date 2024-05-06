@@ -1,14 +1,13 @@
 package br.com.alura.client;
 
 import java.io.IOException;
-import java.io.OutputStream;
 import java.io.PrintStream;
 import java.net.Socket;
 import java.util.Scanner;
 
 public class ClientTask {
 
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) throws Exception {
 
 
         Socket socket = new Socket("localhost", 9090);
@@ -16,15 +15,53 @@ public class ClientTask {
         System.out.println("Connection established!");
 
 
-        PrintStream ps = new PrintStream(socket.getOutputStream());
-        ps.println("c1");
+        Thread sendCommand = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    System.out.println("Type a command: ");
+                    PrintStream ps = new PrintStream(socket.getOutputStream());
+                    Scanner sc = new Scanner(System.in);
 
-        Scanner sc = new Scanner(System.in);
+                    while(sc.hasNextLine()){
+                        String line = sc.nextLine();
 
-        sc.nextLine();
+                        if(line.trim().isEmpty()){
+                            break;
+                        }
+                        ps.println(line);
+                    }
+                    ps.close();
+                    sc.close();
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        });
 
-        ps.close();
-        sc.close();
+
+        Thread receiveCommand = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    Scanner sc = new Scanner(socket.getInputStream());
+
+                    while(sc.hasNextLine()){
+                        String line = sc.nextLine();
+                        System.out.println(line);
+                    }
+                    sc.close();
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        });
+
+        sendCommand.start();
+        receiveCommand.start();
+        receiveCommand.join();
+
+        System.out.println("Closing client socket");
         socket.close();
     }
 
