@@ -19,7 +19,6 @@ public class Main {
             Thread clientThread = new Thread(distributedServer);
             clientThread.start();
 
-            Thread.sleep(20000);
         }
     }
 }

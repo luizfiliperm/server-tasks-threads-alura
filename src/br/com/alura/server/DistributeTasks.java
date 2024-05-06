@@ -1,6 +1,8 @@
 package br.com.alura.server;
 
+import java.io.IOException;
 import java.net.Socket;
+import java.util.Scanner;
 
 public class DistributeTasks implements Runnable {
 
@@ -12,12 +14,20 @@ public class DistributeTasks implements Runnable {
 
     @Override
     public void run() {
+        try {
         System.out.println("Distributing tasks to " + socket);
 
-        try {
-            Thread.sleep(20000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
+        Scanner sc = new Scanner(socket.getInputStream());
+
+        while (sc.hasNextLine()) {
+            String command = sc.nextLine();
+            System.out.println("Received command: " + command);
+        }
+
+
+        sc.close();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
     }
 }
