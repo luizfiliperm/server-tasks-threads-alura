@@ -4,6 +4,7 @@ import java.io.PrintStream;
 import java.net.Socket;
 import java.util.Scanner;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Future;
 
 public class DistributeTasks implements Runnable {
 
@@ -35,7 +36,11 @@ public class DistributeTasks implements Runnable {
                         break;
                     case "c2":
                         ps.println("Command 2 received");
-                        threadPool.execute(new CommandC2(ps));
+                        Future<String> futureWS = threadPool.submit(new CommandC2CallsWS(ps));
+                        Future<String> futureDB = threadPool.submit(new CommandC2AccessBank(ps));
+
+                        threadPool.submit(new CommandC2ReturnFuture(futureWS, futureDB, ps));
+
                         break;
                     case "exit":
                         ps.println("Exiting...");
