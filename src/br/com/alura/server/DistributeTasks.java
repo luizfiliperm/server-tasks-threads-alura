@@ -1,6 +1,5 @@
 package br.com.alura.server;
 
-import java.io.IOException;
 import java.io.PrintStream;
 import java.net.Socket;
 import java.util.Scanner;
@@ -8,9 +7,11 @@ import java.util.Scanner;
 public class DistributeTasks implements Runnable {
 
     private Socket socket;
+    private TaskServer server;
 
-    public DistributeTasks(Socket socket) {
+    public DistributeTasks(Socket socket, TaskServer server) {
         this.socket = socket;
+        this.server = server;
     }
 
     @Override
@@ -33,6 +34,7 @@ public class DistributeTasks implements Runnable {
                         break;
                     case "exit":
                         ps.println("Exiting...");
+                        server.close();
                         break;
                     default:
                         ps.println("Command not found");
